@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import UserList from './UserList';
 import { User } from './User';
+import * as XLSX from 'xlsx';
 
 const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>([
@@ -51,6 +52,21 @@ const Admin: React.FC = () => {
     localStorage.setItem('accessCount', accessCount.toString());
   }, [accessCount]);
 
+  const exportToExcel = (tableId: string, fileName: string) => {
+    const table = document.getElementById(tableId);
+  
+    // Kiểm tra xem phần tử bảng có tồn tại hay không
+    if (table) {
+      const ws = XLSX.utils.table_to_sheet(table);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+      XLSX.writeFile(wb, fileName);
+    } else {
+      console.error(`Bảng với ID ${tableId} không tồn tại.`);
+    }
+  };
+  
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -85,7 +101,7 @@ const Admin: React.FC = () => {
             <p>Access Count: {accessCount}</p>
           
             {/* Table */}
-            <table className="table-fixed w-full mt-4 mb-6">
+            <table id='accessTable' className="table-fixed w-full mt-4 mb-6">
               <thead>
                 <tr>
                   <th className="w-1/2 px-4 py-2">Month</th>
@@ -101,6 +117,8 @@ const Admin: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            <button onClick={() => exportToExcel('accessTable', 'access_report.xlsx')}>Export to Excel</button>
+
           </>
         ) : (
           // Display account management content here
